@@ -1,0 +1,42 @@
+{
+  "name": "gitlab-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for GitLab API integration",
+  "type": "module",
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisburlacu1/gitlab-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "gitlab",
+    "model-context-protocol"
+  ],
+  "author": "Chris Burlacu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chrisburlacu1/gitlab-mcp/issues"
+  },
+  "homepage": "https://github.com/chrisburlacu1/gitlab-mcp#readme",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.6.1",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
