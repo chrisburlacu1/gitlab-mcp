@@ -14,6 +14,7 @@ import {
 import { CreateNoteSchema } from "./schemas/notes.js";
 import { GetFileContentsSchema, GetRepositoryTreeSchema } from "./schemas/repository.js";
 import { SearchCodeSchema, FindDefinitionsSchema } from "./schemas/search.js";
+import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
 import { searchProjects, getProject, setProjectAlias } from "./tools/projects.js";
 import { listIssues, createIssue } from "./tools/issues.js";
@@ -27,6 +28,7 @@ import {
 import { createNote } from "./tools/notes.js";
 import { getFileContents, getRepositoryTree } from "./tools/repository.js";
 import { searchCode, findDefinitions } from "./tools/search.js";
+import { listPipelines, getPipelineJobs, getJobLog } from "./tools/ci-cd.js";
 
 const server = new McpServer({
   name: "gitlab-mcp-server",
@@ -271,6 +273,54 @@ server.registerTool(
     },
   },
   findDefinitions,
+);
+
+server.registerTool(
+  "gitlab_list_pipelines",
+  {
+    title: "List Pipelines",
+    description: "List recent CI/CD pipelines for a project.",
+    inputSchema: ListPipelinesSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  listPipelines,
+);
+
+server.registerTool(
+  "gitlab_get_pipeline_jobs",
+  {
+    title: "Get Pipeline Jobs",
+    description: "List the individual jobs within a specific pipeline.",
+    inputSchema: GetPipelineJobsSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getPipelineJobs,
+);
+
+server.registerTool(
+  "gitlab_get_job_log",
+  {
+    title: "Get Job Log",
+    description: "Fetch the trace/log for a specific CI/CD job. Useful for diagnosing pipeline failures.",
+    inputSchema: GetJobLogSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getJobLog,
 );
 
 async function main() {
