@@ -5,3 +5,9 @@ export const SearchCodeSchema = z.object({
   project_id: z.union([z.number(), z.string()]).optional().describe("Optional: Scope the search to a specific project. Can be ID, path, or alias."),
   group_id: z.union([z.number(), z.string()]).optional().describe("Optional: Scope the search to a specific group ID or path.")
 }).strict();
+
+export const FindDefinitionsSchema = z.object({
+  query: z.string().describe("The name of the class, function, or symbol to find the definition of"),
+  project_id: z.union([z.number(), z.string()]).optional().describe("Optional: Scope the search to a specific project"),
+  group_id: z.union([z.number(), z.string()]).optional().describe("Optional: Scope the search to a specific group")
+}).strict();

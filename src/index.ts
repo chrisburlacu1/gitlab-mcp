@@ -12,8 +12,8 @@ import {
   CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema } from "./schemas/notes.js";
-import { GetFileContentsSchema } from "./schemas/repository.js";
-import { SearchCodeSchema } from "./schemas/search.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema } from "./schemas/repository.js";
+import { SearchCodeSchema, FindDefinitionsSchema } from "./schemas/search.js";
 
 import { searchProjects, getProject, setProjectAlias } from "./tools/projects.js";
 import { listIssues, createIssue } from "./tools/issues.js";
@@ -25,8 +25,8 @@ import {
   createReviewComment,
 } from "./tools/merge-requests.js";
 import { createNote } from "./tools/notes.js";
-import { getFileContents } from "./tools/repository.js";
-import { searchCode } from "./tools/search.js";
+import { getFileContents, getRepositoryTree } from "./tools/repository.js";
+import { searchCode, findDefinitions } from "./tools/search.js";
 
 const server = new McpServer({
   name: "gitlab-mcp-server",
@@ -226,6 +226,22 @@ server.registerTool(
 );
 
 server.registerTool(
+  "gitlab_get_repository_tree",
+  {
+    title: "Get Repository Tree",
+    description: "Get a recursive list of files and directories in the repository.",
+    inputSchema: GetRepositoryTreeSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getRepositoryTree,
+);
+
+server.registerTool(
   "gitlab_search_code",
   {
     title: "Search Code",
@@ -239,6 +255,22 @@ server.registerTool(
     },
   },
   searchCode,
+);
+
+server.registerTool(
+  "gitlab_find_definitions",
+  {
+    title: "Find Definitions",
+    description: "Find the definition of a class, function, or symbol (e.g., where it is declared).",
+    inputSchema: FindDefinitionsSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  findDefinitions,
 );
 
 async function main() {
