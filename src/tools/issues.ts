@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { gitlab, handleApiError } from "../services/gitlab.js";
+import { projectResolver } from "../services/project-resolver.js";
 import { GitLabIssue } from "../types.js";
 import { ListIssuesSchema, CreateIssueSchema } from "../schemas/issues.js";
 
 export async function listIssues(params: z.infer<typeof ListIssuesSchema>) {
   try {
-    const issuesData = await gitlab.get<GitLabIssue[]>(`/projects/${params.project_id}/issues`, {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const issuesData = await gitlab.get<GitLabIssue[]>(`/projects/${projectId}/issues`, {
       params: {
         state: params.state,
         labels: params.labels,
@@ -31,7 +33,8 @@ export async function listIssues(params: z.infer<typeof ListIssuesSchema>) {
 
 export async function createIssue(params: z.infer<typeof CreateIssueSchema>) {
   try {
-    const issueData = await gitlab.post<GitLabIssue>(`/projects/${params.project_id}/issues`, {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const issueData = await gitlab.post<GitLabIssue>(`/projects/${projectId}/issues`, {
       title: params.title,
       description: params.description,
       labels: params.labels

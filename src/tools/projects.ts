@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { gitlab, handleApiError } from "../services/gitlab.js";
+import { projectResolver } from "../services/project-resolver.js";
 import { GitLabProject } from "../types.js";
 import { SearchProjectsSchema, GetProjectSchema } from "../schemas/projects.js";
 
@@ -32,10 +33,11 @@ export async function searchProjects(params: z.infer<typeof SearchProjectsSchema
 
 export async function getProject(params: z.infer<typeof GetProjectSchema>) {
   try {
+    const projectId = await projectResolver.resolve(params.project_id);
     const [p, issues, mrs] = await Promise.all([
-      gitlab.get<GitLabProject>(`/projects/${params.project_id}`),
-      gitlab.get<any[]>(`/projects/${params.project_id}/issues`, { params: { per_page: 3, state: "opened" } }).catch(() => []),
-      gitlab.get<any[]>(`/projects/${params.project_id}/merge_requests`, { params: { per_page: 3, state: "opened" } }).catch(() => [])
+      gitlab.get<GitLabProject>(`/projects/${projectId}`),
+      gitlab.get<any[]>(`/projects/${projectId}/issues`, { params: { per_page: 3, state: "opened" } }).catch(() => []),
+      gitlab.get<any[]>(`/projects/${projectId}/merge_requests`, { params: { per_page: 3, state: "opened" } }).catch(() => [])
     ]);
     
     const projectInfo = [

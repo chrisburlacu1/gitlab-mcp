@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { gitlab, handleApiError } from "../services/gitlab.js";
+import { projectResolver } from "../services/project-resolver.js";
 import { GitLabMergeRequest } from "../types.js";
 import {
   CreateMergeRequestSchema,
@@ -13,8 +14,9 @@ export async function createMergeRequest(
   params: z.infer<typeof CreateMergeRequestSchema>,
 ) {
   try {
+    const projectId = await projectResolver.resolve(params.project_id);
     const mrData = await gitlab.post<GitLabMergeRequest>(
-      `/projects/${params.project_id}/merge_requests`,
+      `/projects/${projectId}/merge_requests`,
       {
         source_branch: params.source_branch,
         target_branch: params.target_branch,
@@ -48,8 +50,9 @@ export async function listMergeRequests(
   params: z.infer<typeof ListMergeRequestsSchema>,
 ) {
   try {
+    const projectId = await projectResolver.resolve(params.project_id);
     const mrsData = await gitlab.get<GitLabMergeRequest[]>(
-      `/projects/${params.project_id}/merge_requests`,
+      `/projects/${projectId}/merge_requests`,
       {
         params: {
           state: params.state,
@@ -92,8 +95,9 @@ export async function updateMergeRequest(
   params: z.infer<typeof UpdateMergeRequestSchema>,
 ) {
   try {
+    const projectId = await projectResolver.resolve(params.project_id);
     const mrData = await gitlab.put<GitLabMergeRequest>(
-      `/projects/${params.project_id}/merge_requests/${params.merge_request_iid}`,
+      `/projects/${projectId}/merge_requests/${params.merge_request_iid}`,
       {
         title: params.title,
         description: params.description,
@@ -128,8 +132,9 @@ export async function getMergeRequestChanges(
   params: z.infer<typeof GetMergeRequestChangesSchema>,
 ) {
   try {
+    const projectId = await projectResolver.resolve(params.project_id);
     const changesData = await gitlab.get<any>(
-      `/projects/${params.project_id}/merge_requests/${params.merge_request_iid}/changes`,
+      `/projects/${projectId}/merge_requests/${params.merge_request_iid}/changes`,
     );
 
     const changes = changesData.changes || [];
@@ -162,8 +167,9 @@ export async function createReviewComment(
   params: z.infer<typeof CreateReviewCommentSchema>,
 ) {
   try {
+    const projectId = await projectResolver.resolve(params.project_id);
     await gitlab.post(
-      `/projects/${params.project_id}/merge_requests/${params.merge_request_iid}/discussions`,
+      `/projects/${projectId}/merge_requests/${params.merge_request_iid}/discussions`,
       {
         body: params.body,
         position: {

@@ -8,5 +8,5 @@ export const SearchProjectsSchema = z.object({
 }).strict();
 
 export const GetProjectSchema = z.object({
-  project_id: z.number().describe("The ID of the project")
+  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
 }).strict();

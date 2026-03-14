@@ -1,14 +1,16 @@
 import { z } from "zod";
 import { gitlab, handleApiError } from "../services/gitlab.js";
+import { projectResolver } from "../services/project-resolver.js";
 import { GetFileContentsSchema } from "../schemas/repository.js";
 
 export async function getFileContents(
   params: z.infer<typeof GetFileContentsSchema>,
 ) {
   try {
+    const projectId = await projectResolver.resolve(params.project_id);
     const encodedPath = encodeURIComponent(params.file_path);
     const fileData = await gitlab.get<string>(
-      `/projects/${params.project_id}/repository/files/${encodedPath}/raw`,
+      `/projects/${projectId}/repository/files/${encodedPath}/raw`,
       {
         params: { ref: params.ref },
         responseType: "text",
