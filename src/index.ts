@@ -13,6 +13,7 @@ import {
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema } from "./schemas/notes.js";
 import { GetFileContentsSchema } from "./schemas/repository.js";
+import { SearchCodeSchema } from "./schemas/search.js";
 
 import { searchProjects, getProject, setProjectAlias } from "./tools/projects.js";
 import { listIssues, createIssue } from "./tools/issues.js";
@@ -25,6 +26,7 @@ import {
 } from "./tools/merge-requests.js";
 import { createNote } from "./tools/notes.js";
 import { getFileContents } from "./tools/repository.js";
+import { searchCode } from "./tools/search.js";
 
 const server = new McpServer({
   name: "gitlab-mcp-server",
@@ -221,6 +223,22 @@ server.registerTool(
     },
   },
   getFileContents,
+);
+
+server.registerTool(
+  "gitlab_search_code",
+  {
+    title: "Search Code",
+    description: "Search for code snippets globally, or scoped to a specific group or project.",
+    inputSchema: SearchCodeSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  searchCode,
 );
 
 async function main() {
