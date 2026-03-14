@@ -50,6 +50,12 @@ This server requires the following environment variables:
 
 - **`gitlab_create_note`**: Add a general comment to an issue or merge request.
 
+### CI/CD Pipelines
+
+- **`gitlab_list_pipelines`**: View recent pipelines for a project (filterable by status/branch).
+- **`gitlab_get_pipeline_jobs`**: List the individual jobs that make up a specific pipeline.
+- **`gitlab_get_job_log`**: Fetch the raw trace log of a job. Includes LLM-optimized instructions to automatically diagnose the root cause of build failures.
+
 ## Development
 
 1.  **Install dependencies**:
