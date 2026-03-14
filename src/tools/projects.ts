@@ -14,16 +14,12 @@ export async function searchProjects(params: z.infer<typeof SearchProjectsSchema
       }
     });
 
-    const projects = response.data.map(p => ({
-      id: p.id,
-      name: p.name_with_namespace,
-      url: p.web_url,
-      description: p.description,
-      last_activity: p.last_activity_at
-    }));
+    const projects = response.data.map(p => 
+      `- [${p.name_with_namespace}](${p.web_url}) (ID: ${p.id})${p.description ? ` - ${p.description}` : ""}`
+    ).join("\n");
 
     return {
-      content: [{ type: "text" as const, text: JSON.stringify(projects, null, 2) }]
+      content: [{ type: "text" as const, text: projects || "No projects found." }]
     };
   } catch (error) {
     return {
@@ -36,8 +32,22 @@ export async function searchProjects(params: z.infer<typeof SearchProjectsSchema
 export async function getProject(params: z.infer<typeof GetProjectSchema>) {
   try {
     const response = await gitlab.get<GitLabProject>(`/projects/${params.project_id}`);
+    const p = response.data;
+    
+    const projectInfo = [
+      `# [${p.name_with_namespace}](${p.web_url}) (ID: ${p.id})`,
+      p.description ? `> ${p.description}\n` : "",
+      `- **Path:** \`${p.path_with_namespace}\``,
+      `- **Default Branch:** \`${p.default_branch}\``,
+      `- **Stars:** ${p.star_count} | **Forks:** ${p.forks_count}`,
+      `- **Created At:** ${p.created_at}`,
+      `- **Last Activity:** ${p.last_activity_at}`,
+      `- **SSH URL:** \`${p.ssh_url_to_repo}\``,
+      `- **HTTP URL:** \`${p.http_url_to_repo}\``
+    ].filter(Boolean).join("\n");
+
     return {
-      content: [{ type: "text" as const, text: JSON.stringify(response.data, null, 2) }]
+      content: [{ type: "text" as const, text: projectInfo }]
     };
   } catch (error) {
     return {

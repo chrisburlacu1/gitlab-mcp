@@ -14,18 +14,12 @@ export async function listIssues(params: z.infer<typeof ListIssuesSchema>) {
       }
     });
 
-    const issues = response.data.map(i => ({
-      iid: i.iid,
-      title: i.title,
-      state: i.state,
-      author: i.author.username,
-      labels: i.labels,
-      url: i.web_url,
-      created_at: i.created_at
-    }));
+    const issues = response.data.map(i => 
+      `- #${i.iid} [${i.title}](${i.web_url}) (State: ${i.state}) - @${i.author.username}${i.labels.length ? ` - Labels: ${i.labels.join(", ")}` : ""}`
+    ).join("\n");
 
     return {
-      content: [{ type: "text" as const, text: JSON.stringify(issues, null, 2) }]
+      content: [{ type: "text" as const, text: issues || "No issues found." }]
     };
   } catch (error) {
     return {
