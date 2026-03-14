@@ -30,3 +30,16 @@ export const GetMergeRequestChangesSchema = z.object({
   project_id: z.number().describe("The ID of the project"),
   merge_request_iid: z.number().describe("The internal ID (IID) of the MR")
 }).strict();
+
+export const CreateReviewCommentSchema = z.object({
+  project_id: z.number().describe("The ID of the project"),
+  merge_request_iid: z.number().describe("The internal ID (IID) of the MR"),
+  body: z.string().describe("The text content of the comment"),
+  base_sha: z.string().describe("Base commit SHA of the merge request (the commit on the target branch)"),
+  start_sha: z.string().describe("Start commit SHA (usually same as base_sha)"),
+  head_sha: z.string().describe("Head commit SHA (the latest commit on the source branch)"),
+  old_path: z.string().optional().describe("The path of the file before changes (needed if the file was moved or renamed)"),
+  new_path: z.string().optional().describe("The path of the file after changes (usually the same as old_path)"),
+  old_line: z.number().optional().describe("The line number in the original file"),
+  new_line: z.number().optional().describe("The line number in the changed file")
+}).strict();

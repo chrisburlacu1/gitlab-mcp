@@ -6,6 +6,7 @@ import {
   ListMergeRequestsSchema,
   UpdateMergeRequestSchema,
   GetMergeRequestChangesSchema,
+  CreateReviewCommentSchema,
 } from "../schemas/merge-requests.js";
 
 export async function createMergeRequest(
@@ -151,6 +152,48 @@ export async function getMergeRequestChanges(
         {
           type: "text" as const,
           text: handleApiError(error, "get_merge_request_changes"),
+        },
+      ],
+    };
+  }
+}
+
+export async function createReviewComment(
+  params: z.infer<typeof CreateReviewCommentSchema>,
+) {
+  try {
+    await gitlab.post(
+      `/projects/${params.project_id}/merge_requests/${params.merge_request_iid}/discussions`,
+      {
+        body: params.body,
+        position: {
+          base_sha: params.base_sha,
+          start_sha: params.start_sha,
+          head_sha: params.head_sha,
+          position_type: "text",
+          old_path: params.old_path,
+          new_path: params.new_path,
+          old_line: params.old_line,
+          new_line: params.new_line,
+        },
+      },
+    );
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `Review comment created successfully.`,
+        },
+      ],
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: "text" as const,
+          text: handleApiError(error, "create_review_comment"),
         },
       ],
     };

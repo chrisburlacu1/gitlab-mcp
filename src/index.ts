@@ -10,6 +10,7 @@ import {
   ListMergeRequestsSchema,
   UpdateMergeRequestSchema,
   GetMergeRequestChangesSchema,
+  CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema } from "./schemas/notes.js";
 import { GetFileContentsSchema } from "./schemas/repository.js";
@@ -22,6 +23,7 @@ import {
   listMergeRequests,
   updateMergeRequest,
   getMergeRequestChanges,
+  createReviewComment,
 } from "./tools/merge-requests.js";
 import { createNote } from "./tools/notes.js";
 import { getFileContents } from "./tools/repository.js";
@@ -157,6 +159,22 @@ server.registerTool(
     },
   },
   getMergeRequestChanges,
+);
+
+server.registerTool(
+  "gitlab_create_review_comment",
+  {
+    title: "Create Review Comment",
+    description: "Add an inline code comment on a specific line within a merge request.",
+    inputSchema: CreateReviewCommentSchema,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  createReviewComment,
 );
 
 server.registerTool(
