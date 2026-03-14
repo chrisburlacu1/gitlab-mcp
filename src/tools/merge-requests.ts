@@ -13,7 +13,7 @@ export async function createMergeRequest(
   params: z.infer<typeof CreateMergeRequestSchema>,
 ) {
   try {
-    const response = await gitlab.post<GitLabMergeRequest>(
+    const mrData = await gitlab.post<GitLabMergeRequest>(
       `/projects/${params.project_id}/merge_requests`,
       {
         source_branch: params.source_branch,
@@ -27,7 +27,7 @@ export async function createMergeRequest(
       content: [
         {
           type: "text" as const,
-          text: `Merge Request created successfully: ${response.data.web_url}`,
+          text: `Merge Request created successfully: ${mrData.web_url}`,
         },
       ],
     };
@@ -48,7 +48,7 @@ export async function listMergeRequests(
   params: z.infer<typeof ListMergeRequestsSchema>,
 ) {
   try {
-    const response = await gitlab.get<GitLabMergeRequest[]>(
+    const mrsData = await gitlab.get<GitLabMergeRequest[]>(
       `/projects/${params.project_id}/merge_requests`,
       {
         params: {
@@ -60,7 +60,7 @@ export async function listMergeRequests(
       },
     );
 
-    const formattedMRs = response.data
+    const formattedMRs = mrsData
       .map(
         (mr) =>
           `#${mr.iid}: ${mr.title} (${mr.state}) - ${mr.web_url}\nSource: ${mr.source_branch} -> Target: ${mr.target_branch}`,
@@ -92,7 +92,7 @@ export async function updateMergeRequest(
   params: z.infer<typeof UpdateMergeRequestSchema>,
 ) {
   try {
-    const response = await gitlab.put<GitLabMergeRequest>(
+    const mrData = await gitlab.put<GitLabMergeRequest>(
       `/projects/${params.project_id}/merge_requests/${params.merge_request_iid}`,
       {
         title: params.title,
@@ -107,7 +107,7 @@ export async function updateMergeRequest(
       content: [
         {
           type: "text" as const,
-          text: `Merge Request updated successfully: ${response.data.web_url}`,
+          text: `Merge Request updated successfully: ${mrData.web_url}`,
         },
       ],
     };
@@ -128,11 +128,11 @@ export async function getMergeRequestChanges(
   params: z.infer<typeof GetMergeRequestChangesSchema>,
 ) {
   try {
-    const response = await gitlab.get<any>(
+    const changesData = await gitlab.get<any>(
       `/projects/${params.project_id}/merge_requests/${params.merge_request_iid}/changes`,
     );
 
-    const changes = response.data.changes || [];
+    const changes = changesData.changes || [];
     const formattedChanges = changes
       .map((change: any) => `File: ${change.new_path}\nDiff:\n${change.diff}`)
       .join("\n\n");

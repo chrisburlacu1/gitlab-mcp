@@ -7,7 +7,7 @@ export async function getFileContents(
 ) {
   try {
     const encodedPath = encodeURIComponent(params.file_path);
-    const response = await gitlab.get<string>(
+    const fileData = await gitlab.get<string>(
       `/projects/${params.project_id}/repository/files/${encodedPath}/raw`,
       {
         params: { ref: params.ref },
@@ -20,9 +20,9 @@ export async function getFileContents(
         {
           type: "text" as const,
           text:
-            typeof response.data === "string"
-              ? response.data
-              : JSON.stringify(response.data),
+            typeof fileData === "string"
+              ? fileData
+              : JSON.stringify(fileData),
         },
       ],
     };

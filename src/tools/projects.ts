@@ -5,16 +5,17 @@ import { SearchProjectsSchema, GetProjectSchema } from "../schemas/projects.js";
 
 export async function searchProjects(params: z.infer<typeof SearchProjectsSchema>) {
   try {
-    const response = await gitlab.get<GitLabProject[]>("/projects", {
+    const projectsData = await gitlab.get<GitLabProject[]>("/projects", {
       params: {
         search: params.search,
         membership: params.membership,
         per_page: params.limit,
-        order_by: "last_activity_at"
+        order_by: "last_activity_at",
+        simple: true
       }
     });
 
-    const projects = response.data.map(p => 
+    const projects = projectsData.map(p => 
       `- [${p.name_with_namespace}](${p.web_url}) (ID: ${p.id})${p.description ? ` - ${p.description}` : ""}`
     ).join("\n");
 
@@ -31,8 +32,11 @@ export async function searchProjects(params: z.infer<typeof SearchProjectsSchema
 
 export async function getProject(params: z.infer<typeof GetProjectSchema>) {
   try {
-    const response = await gitlab.get<GitLabProject>(`/projects/${params.project_id}`);
-    const p = response.data;
+    const [p, issues, mrs] = await Promise.all([
+      gitlab.get<GitLabProject>(`/projects/${params.project_id}`),
+      gitlab.get<any[]>(`/projects/${params.project_id}/issues`, { params: { per_page: 3, state: "opened" } }).catch(() => []),
+      gitlab.get<any[]>(`/projects/${params.project_id}/merge_requests`, { params: { per_page: 3, state: "opened" } }).catch(() => [])
+    ]);
     
     const projectInfo = [
       `# [${p.name_with_namespace}](${p.web_url}) (ID: ${p.id})`,
@@ -44,10 +48,18 @@ export async function getProject(params: z.infer<typeof GetProjectSchema>) {
       `- **Last Activity:** ${p.last_activity_at}`,
       `- **SSH URL:** \`${p.ssh_url_to_repo}\``,
       `- **HTTP URL:** \`${p.http_url_to_repo}\``
-    ].filter(Boolean).join("\n");
+    ];
+
+    if (issues && issues.length > 0) {
+      projectInfo.push(`\n### Recent Open Issues\n` + issues.map((i: any) => `- #${i.iid} [${i.title}](${i.web_url})`).join("\n"));
+    }
+
+    if (mrs && mrs.length > 0) {
+      projectInfo.push(`\n### Recent Open Merge Requests\n` + mrs.map((m: any) => `- !${m.iid} [${m.title}](${m.web_url})`).join("\n"));
+    }
 
     return {
-      content: [{ type: "text" as const, text: projectInfo }]
+      content: [{ type: "text" as const, text: projectInfo.filter(Boolean).join("\n") }]
     };
   } catch (error) {
     return {
