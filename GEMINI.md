@@ -1,6 +1,6 @@
 # GitLab MCP Server
 
-A Model Context Protocol (MCP) server that provides a comprehensive interface for interacting with GitLab. It enables LLMs to search projects, manage issues and merge requests, add comments, and read file contents from GitLab repositories.
+A Model Context Protocol (MCP) server that provides a comprehensive interface for interacting with GitLab. This server enables LLMs to search projects, manage issues and merge requests, perform advanced code searches, and navigate repository structures.
 
 ## Project Overview
 
@@ -8,38 +8,38 @@ A Model Context Protocol (MCP) server that provides a comprehensive interface fo
 - **Main Technologies:** TypeScript, Node.js, `@modelcontextprotocol/sdk`, Axios, Zod, Dotenv.
 - **Architecture:**
   - `src/index.ts`: The entry point that initializes the MCP server and registers all tools.
-  - `src/tools/`: Contains the implementation logic for each GitLab interaction category (Issues, MRs, Projects, Notes, Repository).
-  - `src/schemas/`: Defines the Zod input schemas for each tool, ensuring strict type safety and clear documentation for the LLM.
-  - `src/services/`: Contains the GitLab API client (`gitlab.ts`) configured with Axios and centralized error handling.
+  - `src/tools/`: Domain-specific implementation logic (Issues, MRs, Projects, Notes, Repository, Search).
+  - `src/schemas/`: Zod input schemas for strict type safety and LLM documentation.
+  - `src/services/`:
+    - `gitlab.ts`: Class-based `GitLabService` with connection pooling, 30s TTL caching, and gzip compression.
+    - `project-resolver.ts`: Logic for resolving project IDs from names, paths, or custom aliases.
   - `src/types.ts`: Shared TypeScript interfaces for GitLab API responses.
 
 ## Key Capabilities
 
-- **Projects:** Search for projects and retrieve detailed project metadata.
-- **Issues:** List, filter, and create issues within specific projects.
-- **Merge Requests:** List MRs, create new ones, update existing ones, and retrieve diff changes.
-- **Notes:** Add comments to issues or merge requests.
-- **Repository:** Fetch raw file contents from any branch or tag.
+- **Projects:** Search, get metadata (with recent Issues/MRs), and set persistent shorthand aliases (e.g., `nds`).
+- **Issues:** List, filter, and create issues.
+- **Merge Requests:** List, create, update, view diffs, and add inline code review comments.
+- **Repository:** Fetch raw file contents and view recursive directory trees.
+- **Advanced Search:** Search for code snippets or specific symbol definitions globally or scoped to groups/projects.
+
+## Development Conventions
+
+- **Tool Naming:** Follow the `gitlab_<action>_<entity>` pattern.
+- **Response Formatting:** All tools MUST return concise, human-readable Markdown to minimize token usage and improve clarity for the LLM.
+- **Project Resolution:** All project-related tools MUST use `projectResolver.resolve()` to allow the user to provide names, paths, or aliases instead of numeric IDs.
+- **Caching:** The `GitLabService` transparently caches GET requests for 30 seconds. This can be bypassed with `disableCache: true` in the request config if necessary.
+- **Persistence:** Custom aliases are saved to `aliases.json` in the project root.
 
 ## Building and Running
 
 ### Environment Setup
-Create a `.env` file based on `.env.example` with the following:
-- `GITLAB_PERSONAL_ACCESS_TOKEN`: Your GitLab PAT (requires `api` scope).
+Create a `.env` file with:
+- `GITLAB_PERSONAL_ACCESS_TOKEN`: Your GitLab PAT (requires `api` and `read_api` scopes).
 - `GITLAB_API_URL`: (Optional) Defaults to `https://gitlab.com/api/v4`.
 
 ### Commands
 - **Install Dependencies:** `npm install`
-- **Build Project:** `npm run build` (Compiles TypeScript to `dist/`)
-- **Run Server (Stdio):** `npm start` (Runs `node dist/index.js`)
-- **Development Mode:** `npm run dev` (Uses `tsx watch` for auto-reloading)
-- **Clean Build:** `npm run clean` (Removes `dist/` directory)
-
-## Development Conventions
-
-- **Tool Registration:** All tools are registered in `src/index.ts` with descriptive titles, input schemas, and operational annotations (e.g., `readOnlyHint`).
-- **Input Validation:** Every tool uses a Zod schema defined in `src/schemas/` to validate incoming arguments.
-- **API Interaction:** All external calls should use the central `gitlab` Axios instance in `src/services/gitlab.ts`.
-- **Error Handling:** Use the `handleApiError` utility to provide standardized and informative error messages to the LLM.
-- **Naming:** Follow the `gitlab_<action>_<entity>` pattern for tool names for consistency.
-- **Keep-Alive:** The server uses an HTTPS agent with `keepAlive: true` and a connection pool (`maxSockets: 20`) to optimize high-frequency API requests.
+- **Build Project:** `npm run build`
+- **Development Mode:** `npm run dev` (Uses `tsx watch`)
+- **Run Server (Stdio):** `npm start`

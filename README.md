@@ -1,100 +1,76 @@
-# GitLab MCP
+# GitLab MCP Server
 
-A Model Context Protocol (MCP) server for interacting with the GitLab API. This server enables LLMs to search projects, manage issues, merge requests, and read file contents from GitLab repositories.
+A Model Context Protocol (MCP) server that provides a comprehensive interface for interacting with GitLab. This server enables LLMs to search projects, navigate repositories, manage issues and merge requests, and perform advanced code searches.
+
+## Features
+
+- **Smart Project Resolution**: Use project names, full paths, or custom aliases instead of numeric IDs.
+- **Persistent Aliases**: Create shorthand names for projects (e.g., `nds` for `news-data-service`) that persist across sessions.
+- **Rich Markdown Responses**: Tool outputs are formatted for maximum LLM readability and minimal token consumption.
+- **Advanced Code Search**: Search for code snippets or specific symbol definitions (classes, functions) across projects or groups.
+- **Performance Optimized**: Includes connection pooling, transparent 30s TTL caching, and gzip compression.
+- **Recursive Navigation**: View hierarchical repository structures at a glance.
 
 ## Configuration
 
 This server requires the following environment variables:
 
-- `GITLAB_PERSONAL_ACCESS_TOKEN`: Your GitLab Personal Access Token (requires `api` scope).
-- `GITLAB_API_URL`: (Optional) The base URL for the GitLab API. Defaults to `https://gitlab.com/api/v4`.
+- `GITLAB_PERSONAL_ACCESS_TOKEN`: Your GitLab Personal Access Token (requires `api` and `read_api` scopes).
+- `GITLAB_API_URL`: (Optional) The base URL for your GitLab instance. Defaults to `https://gitlab.com/api/v4`.
 
 ## Tools
 
-### Projects
+### Projects & Navigation
 
-- **`gitlab_search_projects`**
-  - Search for projects by name or path.
-  - Inputs: `search` (string), `membership` (boolean, default: true), `limit` (number, default: 20).
-  - Returns: List of matching projects.
+- **`gitlab_search_projects`**: Search for projects by name or path.
+- **`gitlab_get_project`**: Get detailed metadata, including recent open issues and merge requests.
+- **`gitlab_get_repository_tree`**: Get a recursive list of files and directories in a repository.
+- **`gitlab_set_project_alias`**: Create a persistent shorthand alias for a project ID or path.
 
-- **`gitlab_get_project`**
-  - Get details of a specific project.
-  - Inputs: `project_id` (number).
-  - Returns: Project details (ID, name, description, URLs).
+### Code & Search
+
+- **`gitlab_get_file_contents`**: Read the raw content of any file from a specific branch or tag.
+- **`gitlab_search_code`**: Search for code snippets globally, or scoped to a specific group/project.
+- **`gitlab_find_definitions`**: Precision search to find where a class, function, or symbol is declared.
 
 ### Issues
 
-- **`gitlab_list_issues`**
-  - List issues for a project.
-  - Inputs: `project_id` (number), `state` (opened/closed/all), `labels` (string), `search` (string), `limit` (number).
-  - Returns: List of issues.
-
-- **`gitlab_create_issue`**
-  - Create a new issue.
-  - Inputs: `project_id` (number), `title` (string), `description` (string, optional), `labels` (string, optional).
-  - Returns: Created issue details.
+- **`gitlab_list_issues`**: List and filter issues for a project.
+- **`gitlab_create_issue`**: Create a new issue with labels and description.
 
 ### Merge Requests
 
-- **`gitlab_create_merge_request`**
-  - Create a new merge request.
-  - Inputs: `project_id` (number), `source_branch` (string), `target_branch` (string), `title` (string), `description` (string, optional).
-  - Returns: Created merge request details.
-
-- **`gitlab_list_merge_requests`**
-  - List merge requests for a project.
-  - Inputs: `project_id` (number), `state` (opened/closed/locked/merged/all), `source_branch` (string, optional), `target_branch` (string, optional), `search` (string, optional).
-  - Returns: List of merge requests with status and branches.
-
-- **`gitlab_update_merge_request`**
-  - Update a merge request (title, description, state, etc).
-  - Inputs: `project_id` (number), `merge_request_iid` (number), `title` (string, optional), `description` (string, optional), `state_event` (close/reopen), `target_branch` (string, optional).
-  - Returns: Updated merge request details.
-
-- **`gitlab_get_merge_request_changes`**
-  - Get the diff/changes of a merge request.
-  - Inputs: `project_id` (number), `merge_request_iid` (number).
-  - Returns: List of changed files and their diffs.
+- **`gitlab_list_merge_requests`**: List and filter MRs for a project.
+- **`gitlab_create_merge_request`**: Open a new merge request between branches.
+- **`gitlab_update_merge_request`**: Update MR details or change its state.
+- **`gitlab_get_merge_request_changes`**: View the file diffs for a specific merge request.
+- **`gitlab_create_review_comment`**: Add an inline code comment on a specific line within an MR.
 
 ### Comments
 
-- **`gitlab_create_note`**
-  - Add a comment to an issue or merge request.
-  - Inputs: `project_id` (number), `entity_type` (issue/merge_request), `entity_iid` (number), `body` (string).
-  - Returns: Created comment details.
-
-### Repository
-
-- **`gitlab_get_file_contents`**
-  - Get the raw content of a file.
-  - Inputs: `project_id` (number), `file_path` (string), `ref` (string, default: "main").
-  - Returns: Raw file content string.
-
-## Features
-
-- **Optimized Fetching**: Uses HTTP Keep-Alive with a connection pool (max 20) for improved performance.
-- **Robust Error Handling**: Standardized error messages for common GitLab API failures (401, 403, 404).
+- **`gitlab_create_note`**: Add a general comment to an issue or merge request.
 
 ## Development
 
-1.  Install dependencies:
-
+1.  **Install dependencies**:
     ```bash
     npm install
     ```
 
-2.  Build the project:
-
+2.  **Build the project**:
     ```bash
     npm run build
     ```
 
-3.  Run the server (stdio mode):
+3.  **Run in Development Mode** (auto-reloading):
+    ```bash
+    npm run dev
+    ```
+
+4.  **Production Run** (stdio):
     ```bash
     node dist/index.js
     ```
-    _Note: Ensure environment variables are set before running._
 
 ## License
 
