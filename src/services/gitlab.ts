@@ -43,7 +43,7 @@ interface CacheEntry<T> {
 class GitLabService {
   private client: AxiosInstance;
   private cache = new Map<string, CacheEntry<any>>();
-  private readonly CACHE_TTL = 30 * 1000; // 30 seconds
+  private readonly CACHE_TTL = 30 * 1000;
 
   constructor() {
     const httpsAgent = new https.Agent({

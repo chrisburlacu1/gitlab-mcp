@@ -2,8 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-// Import schemas
-import { SearchProjectsSchema, GetProjectSchema } from "./schemas/projects.js";
+import { SearchProjectsSchema, GetProjectSchema, SetProjectAliasSchema } from "./schemas/projects.js";
 import { ListIssuesSchema, CreateIssueSchema } from "./schemas/issues.js";
 import {
   CreateMergeRequestSchema,
@@ -15,8 +14,7 @@ import {
 import { CreateNoteSchema } from "./schemas/notes.js";
 import { GetFileContentsSchema } from "./schemas/repository.js";
 
-// Import tool implementations
-import { searchProjects, getProject } from "./tools/projects.js";
+import { searchProjects, getProject, setProjectAlias } from "./tools/projects.js";
 import { listIssues, createIssue } from "./tools/issues.js";
 import {
   createMergeRequest,
@@ -63,6 +61,22 @@ server.registerTool(
     },
   },
   getProject,
+);
+
+server.registerTool(
+  "gitlab_set_project_alias",
+  {
+    title: "Set Project Alias",
+    description: "Create or update a shorthand alias for a GitLab project (e.g., 'nds' -> 'news-data-service'). This alias will persist across sessions.",
+    inputSchema: SetProjectAliasSchema,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  setProjectAlias,
 );
 
 server.registerTool(
