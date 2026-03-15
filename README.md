@@ -30,9 +30,10 @@ This server requires the following environment variables:
 
 ### Code & Search
 
-- **`gitlab_get_file_contents`**: Read the raw content of any file from a specific branch or tag.
+- **`gitlab_get_file_contents`**: Read the raw content of any file. Supports `start_line` and `end_line` for targeted reading.
+- **`gitlab_get_multiple_files`**: Fetch the contents of multiple files concurrently in a single request.
 - **`gitlab_search_code`**: Search for code snippets globally, or scoped to a specific group/project.
-- **`gitlab_find_definitions`**: Precision search to find where a class, function, or symbol is declared.
+- **`gitlab_find_definitions`**: Find where a class, function, or symbol is declared. Optimized for compatibility across all GitLab tiers.
 
 ### Issues
 
