@@ -12,7 +12,7 @@ import {
   CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema } from "./schemas/notes.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema } from "./schemas/repository.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema, GetProjectStackSchema, ReadImportedFileSchema } from "./schemas/repository.js";
 import { SearchCodeSchema, FindDefinitionsSchema } from "./schemas/search.js";
 import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
@@ -26,7 +26,7 @@ import {
   createReviewComment,
 } from "./tools/merge-requests.js";
 import { createNote } from "./tools/notes.js";
-import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles } from "./tools/repository.js";
+import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles, getProjectStack, readImportedFile } from "./tools/repository.js";
 import { searchCode, findDefinitions } from "./tools/search.js";
 import { listPipelines, getPipelineJobs, getJobLog } from "./tools/ci-cd.js";
 
@@ -385,6 +385,38 @@ server.registerTool(
     },
   },
   createBranch,
+);
+
+server.registerTool(
+  "gitlab_get_project_stack",
+  {
+    title: "Get Project Stack",
+    description: "Analyze the project's root manifest files to determine the technology stack and dependencies.",
+    inputSchema: GetProjectStackSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getProjectStack,
+);
+
+server.registerTool(
+  "gitlab_read_imported_file",
+  {
+    title: "Read Imported File",
+    description: "Follow a relative import path from a source file and read its content. Handles common extensions and index files automatically.",
+    inputSchema: ReadImportedFileSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  readImportedFile,
 );
 
 async function main() {

@@ -1,7 +1,15 @@
 import { z } from "zod";
+import path from "path";
 import { gitlab, handleApiError } from "../services/gitlab.js";
 import { projectResolver } from "../services/project-resolver.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema } from "../schemas/repository.js";
+import { 
+  GetFileContentsSchema, 
+  GetRepositoryTreeSchema, 
+  CreateBranchSchema, 
+  GetMultipleFilesSchema,
+  GetProjectStackSchema,
+  ReadImportedFileSchema
+} from "../schemas/repository.js";
 
 export async function getFileContents(
   params: z.infer<typeof GetFileContentsSchema>,
@@ -144,6 +152,118 @@ export async function getMultipleFiles(params: z.infer<typeof GetMultipleFilesSc
     return {
       isError: true,
       content: [{ type: "text" as const, text: handleApiError(error, "get_multiple_files") }]
+    };
+  }
+}
+
+export async function getProjectStack(params: z.infer<typeof GetProjectStackSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const treeData = await gitlab.get<any[]>(`/projects/${projectId}/repository/tree`, {
+      params: { per_page: 100 }
+    });
+
+    const manifestFiles = [
+      "package.json", "go.mod", "Cargo.toml", "requirements.txt", 
+      "Gemfile", "composer.json", "Dockerfile", "docker-compose.yml",
+      ".gitlab-ci.yml", "tsconfig.json"
+    ];
+
+    const foundManifests = treeData
+      .filter(item => item.type === "blob" && manifestFiles.includes(item.name))
+      .map(item => item.name);
+
+    if (foundManifests.length === 0) {
+      return {
+        content: [{ type: "text" as const, text: "No common manifest files found in root. Could not determine tech stack." }]
+      };
+    }
+
+    const filePromises = foundManifests.map(async (fileName) => {
+      try {
+        const content = await gitlab.get<string>(`/projects/${projectId}/repository/files/${fileName}/raw`, {
+          responseType: "text"
+        });
+        return { name: fileName, content };
+      } catch {
+        return null;
+      }
+    });
+
+    const fileContents = (await Promise.all(filePromises)).filter((f): f is { name: string, content: string } => f !== null);
+
+    let report = "# Project Tech Stack Profile\n\n";
+    
+    for (const file of fileContents) {
+      report += `### 📄 ${file.name}\n`;
+      if (file.name === "package.json") {
+        try {
+          const pkg = JSON.parse(file.content);
+          report += `- **Name:** ${pkg.name}\n`;
+          report += `- **Version:** ${pkg.version}\n`;
+          if (pkg.dependencies) report += `- **Dependencies:** ${Object.keys(pkg.dependencies).length} packages\n`;
+          if (pkg.devDependencies) report += `- **Dev Dependencies:** ${Object.keys(pkg.devDependencies).length} packages\n`;
+          if (pkg.scripts) report += `- **Scripts:** ${Object.keys(pkg.scripts).join(", ")}\n`;
+        } catch {
+          report += "- *Error parsing package.json*\n";
+        }
+      } else {
+        // For others, show the first 10 lines
+        const lines = file.content.split("\n").slice(0, 10).join("\n");
+        report += "```\n" + lines + (file.content.split("\n").length > 10 ? "\n..." : "") + "\n```\n";
+      }
+      report += "\n";
+    }
+
+    return {
+      content: [{ type: "text" as const, text: report }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "get_project_stack") }]
+    };
+  }
+}
+
+export async function readImportedFile(params: z.infer<typeof ReadImportedFileSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const sourceDir = path.dirname(params.source_file_path);
+    let resolvedPath = path.posix.join(sourceDir, params.import_string).replace(/\\/g, "/");
+
+    // Clean up paths like './utils' or '../services'
+    if (resolvedPath.startsWith("./")) resolvedPath = resolvedPath.substring(2);
+    
+    const possibleExtensions = ["", ".ts", ".tsx", ".js", ".jsx", "/index.ts", "/index.js"];
+    
+    for (const ext of possibleExtensions) {
+      const tryPath = resolvedPath + ext;
+      const encodedPath = encodeURIComponent(tryPath);
+      try {
+        const fileData = await gitlab.get<string>(
+          `/projects/${projectId}/repository/files/${encodedPath}/raw`,
+          {
+            params: { ref: params.ref },
+            responseType: "text",
+          },
+        );
+        return {
+          content: [{ 
+            type: "text" as const, 
+            text: `### Resolved Import: \`${tryPath}\`\n\n\`\`\`\n${fileData}\n\`\`\`` 
+          }]
+        };
+      } catch {
+        continue;
+      }
+    }
+
+    throw new Error(`Could not resolve import '${params.import_string}' from '${params.source_file_path}' after trying multiple extensions.`);
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "read_imported_file") }]
     };
   }
 }

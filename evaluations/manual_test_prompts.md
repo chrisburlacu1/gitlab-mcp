@@ -91,4 +91,13 @@ These prompts are designed to test the **Agentic IQ** of an LLM equipped with th
 1.  **Find Issue:** Call `gitlab_list_issues` for the project.
 2.  **Get Details:** Call `gitlab_get_issue` to read the full context.
 3.  **Update Issue:** Call `gitlab_update_issue` to add an 'in-progress' label or assign it.
-4.  **Create Branch:** Call `gitlab_create_branch` using the issue ID (e.g., `12-fix-bug`) from `main`.
+---
+
+## 9. The "Tech Stack and Import" Test
+**Prompt:**
+> "Give me a technical profile of the `core-api` project. What language and frameworks are being used? After that, I see an import for `../utils/logger` in `src/main.ts`. Can you follow that import and show me how the logger is configured?"
+
+**Expected Behavior:**
+1.  **Get Stack:** Call `gitlab_get_project_stack` for the `core-api` project.
+2.  **Follow Import:** Call `gitlab_read_imported_file` with `source_file_path="src/main.ts"` and `import_string="../utils/logger"`.
+3.  **Synthesize:** Provide the project profile and the logger configuration details.

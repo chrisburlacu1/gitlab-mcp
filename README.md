@@ -25,6 +25,8 @@ This server requires the following environment variables:
 - **`gitlab_search_projects`**: Search for projects by name or path.
 - **`gitlab_get_project`**: Get detailed metadata, including recent open issues and merge requests.
 - **`gitlab_get_repository_tree`**: Get a recursive list of files and directories in a repository.
+- **`gitlab_get_project_stack`**: Analyze root manifest files to determine the tech stack and dependencies.
+- **`gitlab_read_imported_file`**: Follow and read relative imports from a source file automatically.
 - **`gitlab_create_branch`**: Create a new branch for development.
 - **`gitlab_set_project_alias`**: Create a persistent shorthand alias for a project ID or path.
 
