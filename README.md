@@ -4,8 +4,8 @@ A Model Context Protocol (MCP) server that provides a comprehensive interface fo
 
 ## Features
 
-- **Smart Project Resolution**: Use project names, full paths, or custom aliases instead of numeric IDs.
-- **Persistent Aliases**: Create shorthand names for projects (e.g., `nds` for `news-data-service`) that persist across sessions.
+- **Smart Project Resolution**: Use project names, full paths, or custom shortcuts instead of numeric IDs.
+- **Persistent Shortcuts**: Create shorthand names for projects (e.g., `nds` for `news-data-service`) that persist across sessions.
 - **Rich Markdown Responses**: Tool outputs are formatted for maximum LLM readability and minimal token consumption.
 - **Advanced Code Search**: Search for code snippets or specific symbol definitions (classes, functions) across projects or groups.
 - **Performance Optimized**: Includes connection pooling, transparent 30s TTL caching, and gzip compression.
@@ -28,7 +28,7 @@ This server requires the following environment variables:
 - **`gitlab_get_project_stack`**: Analyze root manifest files to determine the tech stack and dependencies.
 - **`gitlab_read_imported_file`**: Follow and read relative imports from a source file automatically.
 - **`gitlab_create_branch`**: Create a new branch for development.
-- **`gitlab_set_project_alias`**: Create a persistent shorthand alias for a project ID or path.
+- **`gitlab_set_project_shortcut`**: Create a persistent shorthand shortcut for a project ID or path.
 
 ### Code & Search
 

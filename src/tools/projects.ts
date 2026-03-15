@@ -2,7 +2,7 @@ import { z } from "zod";
 import { gitlab, handleApiError } from "../services/gitlab.js";
 import { projectResolver } from "../services/project-resolver.js";
 import { GitLabProject } from "../types.js";
-import { SearchProjectsSchema, GetProjectSchema, SetProjectAliasSchema } from "../schemas/projects.js";
+import { SearchProjectsSchema, GetProjectSchema, SetProjectShortcutSchema } from "../schemas/projects.js";
 
 export async function searchProjects(params: z.infer<typeof SearchProjectsSchema>) {
   try {
@@ -71,18 +71,18 @@ export async function getProject(params: z.infer<typeof GetProjectSchema>) {
   }
 }
 
-export async function setProjectAlias(params: z.infer<typeof SetProjectAliasSchema>) {
+export async function setProjectShortcut(params: z.infer<typeof SetProjectShortcutSchema>) {
   try {
     const projectId = await projectResolver.resolve(params.project_id);
-    await projectResolver.setAlias(params.alias, projectId);
+    await projectResolver.setShortcut(params.shortcut, projectId);
 
     return {
-      content: [{ type: "text" as const, text: `Alias '${params.alias}' successfully set to project ID ${projectId}.` }]
+      content: [{ type: "text" as const, text: `Shortcut '${params.shortcut}' successfully set to project ID ${projectId}.` }]
     };
   } catch (error) {
     return {
       isError: true,
-      content: [{ type: "text" as const, text: `Failed to set project alias: ${error instanceof Error ? error.message : String(error)}` }]
+      content: [{ type: "text" as const, text: `Failed to set project shortcut: ${error instanceof Error ? error.message : String(error)}` }]
     };
   }
 }

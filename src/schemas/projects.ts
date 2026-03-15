@@ -11,7 +11,7 @@ export const GetProjectSchema = z.object({
   project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
 }).strict();
 
-export const SetProjectAliasSchema = z.object({
-  alias: z.string().describe("The short name or alias to use (e.g., 'nds')"),
-  project_id: z.union([z.number(), z.string()]).describe("The target project ID, name, or path that the alias points to")
+export const SetProjectShortcutSchema = z.object({
+  shortcut: z.string().describe("The short name or shortcut to use (e.g., 'nds')"),
+  project_id: z.union([z.number(), z.string()]).describe("The target project ID, name, or path that the shortcut points to")
 }).strict();

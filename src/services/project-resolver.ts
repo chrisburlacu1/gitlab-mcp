@@ -4,42 +4,35 @@ import fs from "fs/promises";
 import { readFileSync } from "fs";
 import path from "path";
 
-const ALIASES_FILE = path.join(process.cwd(), "aliases.json");
+const CACHE_FILE = path.join(process.cwd(), "project-cache.json");
 
 class ProjectResolver {
-  private cache = new Map<string, number>();
-
-  private aliases: Record<string, string | number> = {};
+  private registry: Record<string, number> = {};
 
   constructor() {
-    this.loadAliases();
+    this.loadRegistrySync();
   }
 
-  private loadAliases() {
+  private loadRegistrySync() {
     try {
-      const data = readFileSync(ALIASES_FILE, "utf-8");
-      this.aliases = JSON.parse(data);
+      const data = readFileSync(CACHE_FILE, "utf-8");
+      this.registry = JSON.parse(data);
     } catch (error) {
-      // File might not exist or be invalid JSON, that's fine
-      this.aliases = {};
+      this.registry = {};
     }
   }
 
-  private async saveAliases() {
+  private async saveRegistry() {
     try {
-      await fs.writeFile(
-        ALIASES_FILE,
-        JSON.stringify(this.aliases, null, 2),
-        "utf-8",
-      );
+      await fs.writeFile(CACHE_FILE, JSON.stringify(this.registry, null, 2), "utf-8");
     } catch (error) {
-      console.error("Failed to save project aliases:", error);
+      console.error("Failed to save project registry:", error);
     }
   }
 
   async resolve(identifier: string | number): Promise<number> {
     if (typeof identifier === "number") return identifier;
-
+    
     const normalized = identifier.toLowerCase().trim();
 
     const numericId = parseInt(normalized, 10);
@@ -47,36 +40,39 @@ class ProjectResolver {
       return numericId;
     }
 
-    const aliased = this.aliases[normalized];
-    if (aliased) {
-      return this.resolve(aliased);
+    if (this.registry[normalized]) {
+      return this.registry[normalized];
     }
 
-    const cached = this.cache.get(normalized);
-    if (cached) return cached;
-
     const projects = await gitlab.get<GitLabProject[]>("/projects", {
-      params: {
-        search: normalized,
-        per_page: 1,
-        simple: true,
-      },
+      params: { 
+        search: normalized, 
+        per_page: 1, 
+        simple: true 
+      }
     });
 
     if (projects && projects.length > 0) {
-      const id = projects[0].id;
-      this.cache.set(normalized, id);
+      const project = projects[0];
+      const id = project.id;
+      
+      // Auto-learn: Store multiple identifiers for this project
+      this.registry[normalized] = id;
+      this.registry[project.name.toLowerCase()] = id;
+      this.registry[project.path.toLowerCase()] = id;
+      this.registry[project.path_with_namespace.toLowerCase()] = id;
+      
+      await this.saveRegistry();
       return id;
     }
 
-    throw new Error(
-      `Could not resolve project identifier: "${identifier}". Please provide a valid Project ID or full path.`,
-    );
+    throw new Error(`Could not resolve project identifier: "${identifier}". Please provide a valid Project ID or full path.`);
   }
 
-  async setAlias(alias: string, target: string | number) {
-    this.aliases[alias.toLowerCase().trim()] = target;
-    await this.saveAliases();
+  async setShortcut(shortcut: string, target: string | number) {
+    const id = typeof target === "number" ? target : await this.resolve(target);
+    this.registry[shortcut.toLowerCase().trim()] = id;
+    await this.saveRegistry();
   }
 }
 

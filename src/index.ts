@@ -2,7 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-import { SearchProjectsSchema, GetProjectSchema, SetProjectAliasSchema } from "./schemas/projects.js";
+import { SearchProjectsSchema, GetProjectSchema, SetProjectShortcutSchema } from "./schemas/projects.js";
 import { ListIssuesSchema, CreateIssueSchema, GetIssueSchema, UpdateIssueSchema } from "./schemas/issues.js";
 import {
   CreateMergeRequestSchema,
@@ -16,7 +16,7 @@ import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, Get
 import { SearchCodeSchema, FindDefinitionsSchema } from "./schemas/search.js";
 import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
-import { searchProjects, getProject, setProjectAlias } from "./tools/projects.js";
+import { searchProjects, getProject, setProjectShortcut } from "./tools/projects.js";
 import { listIssues, createIssue, getIssue, updateIssue } from "./tools/issues.js";
 import {
   createMergeRequest,
@@ -68,11 +68,11 @@ server.registerTool(
 );
 
 server.registerTool(
-  "gitlab_set_project_alias",
+  "gitlab_set_project_shortcut",
   {
-    title: "Set Project Alias",
-    description: "Create or update a shorthand alias for a GitLab project (e.g., 'nds' -> 'news-data-service'). This alias will persist across sessions.",
-    inputSchema: SetProjectAliasSchema,
+    title: "Set Project Shortcut",
+    description: "Create or update a shorthand shortcut for a GitLab project (e.g., 'nds' -> 'news-data-service'). This shortcut will persist across sessions.",
+    inputSchema: SetProjectShortcutSchema,
     annotations: {
       readOnlyHint: false,
       destructiveHint: false,
@@ -80,7 +80,7 @@ server.registerTool(
       openWorldHint: false,
     },
   },
-  setProjectAlias,
+  setProjectShortcut,
 );
 
 server.registerTool(

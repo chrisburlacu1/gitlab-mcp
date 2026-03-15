@@ -17,7 +17,7 @@ A Model Context Protocol (MCP) server that provides a comprehensive interface fo
 
 ## Key Capabilities
 
-- **Projects:** Search, get metadata (with recent Issues/MRs), and set persistent shorthand aliases (e.g., `nds`).
+- **Projects:** Search, get metadata (with recent Issues/MRs), and set persistent shorthand shortcuts (e.g., `nds`).
 - **Issues:** List, filter, get full details, create, and update (assign/state/labels) issues.
 - **Merge Requests:** List, create, update, view diffs, and add inline code review comments.
 - **CI/CD Pipelines:** Monitor pipelines, inspect specific jobs, and fetch job trace logs with auto-analysis prompts.
@@ -28,9 +28,9 @@ A Model Context Protocol (MCP) server that provides a comprehensive interface fo
 
 - **Tool Naming:** Follow the `gitlab_<action>_<entity>` pattern.
 - **Response Formatting:** All tools MUST return concise, human-readable Markdown to minimize token usage and improve clarity for the LLM.
-- **Project Resolution:** All project-related tools MUST use `projectResolver.resolve()` to allow the user to provide names, paths, or aliases instead of numeric IDs.
+- **Project Resolution:** All project-related tools MUST use `projectResolver.resolve()` to allow the user to provide names, paths, or shortcuts instead of numeric IDs.
 - **Caching:** The `GitLabService` transparently caches GET requests for 30 seconds. This can be bypassed with `disableCache: true` in the request config if necessary.
-- **Persistence:** Custom aliases are saved to `aliases.json` in the project root.
+- **Persistence:** Custom shortcuts are saved to `project-cache.json` in the project root.
 
 ## Building and Running
 
