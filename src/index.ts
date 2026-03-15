@@ -12,7 +12,7 @@ import {
   CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema } from "./schemas/notes.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema } from "./schemas/repository.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema } from "./schemas/repository.js";
 import { SearchCodeSchema, FindDefinitionsSchema } from "./schemas/search.js";
 import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
@@ -26,7 +26,7 @@ import {
   createReviewComment,
 } from "./tools/merge-requests.js";
 import { createNote } from "./tools/notes.js";
-import { getFileContents, getRepositoryTree, createBranch } from "./tools/repository.js";
+import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles } from "./tools/repository.js";
 import { searchCode, findDefinitions } from "./tools/search.js";
 import { listPipelines, getPipelineJobs, getJobLog } from "./tools/ci-cd.js";
 
@@ -225,6 +225,22 @@ server.registerTool(
     },
   },
   getFileContents,
+);
+
+server.registerTool(
+  "gitlab_get_multiple_files",
+  {
+    title: "Get Multiple Files",
+    description: "Get the raw contents of multiple files from the repository concurrently.",
+    inputSchema: GetMultipleFilesSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getMultipleFiles,
 );
 
 server.registerTool(

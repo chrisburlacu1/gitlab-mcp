@@ -51,9 +51,9 @@ export async function searchCode(params: z.infer<typeof SearchCodeSchema>) {
 export async function findDefinitions(params: z.infer<typeof FindDefinitionsSchema>) {
   try {
     const { query } = params;
-    // Construct a regex-like search to find definitions
-    // We search for common patterns like: class Name, function Name, interface Name, const Name =
-    const definitionSearchQuery = `("${query}" && (class || function || interface || "const ${query}" || "let ${query}" || "var ${query}" || "type ${query}"))`;
+    // For free-tier compatibility, we use a simple string match instead of complex boolean logic
+    // which requires Elasticsearch (Premium tier). The agent can rely on the result context.
+    const definitionSearchQuery = query;
 
     let endpoint = "/search";
     if (params.project_id) {
