@@ -81,4 +81,14 @@ These prompts are designed to test the **Agentic IQ** of an LLM equipped with th
 **Expected Behavior:**
 1.  **Set Alias:** Call `gitlab_set_project_alias` with `alias="the core"` and `project_id="project-alpha-v2-final"`.
 2.  **Verify Resolution:** Immediately use the new alias `the core` to call `gitlab_list_pipelines`.
-3.  **Confirm:** Tell the user the alias is saved and provide the pipeline status.
+---
+
+## 8. The "Issue Completion Workflow" Test
+**Prompt:**
+> "Find the oldest open issue in the `news-data-service` project. Read its details, assign it to yourself (or just mark it as in-progress), and create a new branch named after the issue number so we can start working on it."
+
+**Expected Behavior:**
+1.  **Find Issue:** Call `gitlab_list_issues` for the project.
+2.  **Get Details:** Call `gitlab_get_issue` to read the full context.
+3.  **Update Issue:** Call `gitlab_update_issue` to add an 'in-progress' label or assign it.
+4.  **Create Branch:** Call `gitlab_create_branch` using the issue ID (e.g., `12-fix-bug`) from `main`.

@@ -25,6 +25,7 @@ This server requires the following environment variables:
 - **`gitlab_search_projects`**: Search for projects by name or path.
 - **`gitlab_get_project`**: Get detailed metadata, including recent open issues and merge requests.
 - **`gitlab_get_repository_tree`**: Get a recursive list of files and directories in a repository.
+- **`gitlab_create_branch`**: Create a new branch for development.
 - **`gitlab_set_project_alias`**: Create a persistent shorthand alias for a project ID or path.
 
 ### Code & Search
@@ -36,7 +37,9 @@ This server requires the following environment variables:
 ### Issues
 
 - **`gitlab_list_issues`**: List and filter issues for a project.
+- **`gitlab_get_issue`**: Get full details, description, and status of a specific issue.
 - **`gitlab_create_issue`**: Create a new issue with labels and description.
+- **`gitlab_update_issue`**: Update an issue's state, labels, or assignment.
 
 ### Merge Requests
 

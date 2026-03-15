@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { gitlab, handleApiError } from "../services/gitlab.js";
 import { projectResolver } from "../services/project-resolver.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema } from "../schemas/repository.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema } from "../schemas/repository.js";
 
 export async function getFileContents(
   params: z.infer<typeof GetFileContentsSchema>,
@@ -78,3 +78,25 @@ export async function getRepositoryTree(
     };
   }
 }
+
+export async function createBranch(params: z.infer<typeof CreateBranchSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const branchData = await gitlab.post<any>(`/projects/${projectId}/repository/branches`, null, {
+      params: {
+        branch: params.branch,
+        ref: params.ref
+      }
+    });
+
+    return {
+      content: [{ type: "text" as const, text: `Branch '${branchData.name}' created successfully from '${params.ref}'.` }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "create_branch") }]
+    };
+  }
+}
+

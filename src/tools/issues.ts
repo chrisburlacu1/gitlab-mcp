@@ -2,7 +2,7 @@ import { z } from "zod";
 import { gitlab, handleApiError } from "../services/gitlab.js";
 import { projectResolver } from "../services/project-resolver.js";
 import { GitLabIssue } from "../types.js";
-import { ListIssuesSchema, CreateIssueSchema } from "../schemas/issues.js";
+import { ListIssuesSchema, CreateIssueSchema, GetIssueSchema, UpdateIssueSchema } from "../schemas/issues.js";
 
 export async function listIssues(params: z.infer<typeof ListIssuesSchema>) {
   try {
@@ -47,6 +47,60 @@ export async function createIssue(params: z.infer<typeof CreateIssueSchema>) {
     return {
       isError: true,
       content: [{ type: "text" as const, text: handleApiError(error, "create_issue") }]
+    };
+  }
+}
+
+export async function getIssue(params: z.infer<typeof GetIssueSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const issueData = await gitlab.get<GitLabIssue>(`/projects/${projectId}/issues/${params.issue_iid}`);
+
+    const assignees = issueData.assignees?.map(a => `@${a.username}`).join(", ") || "None";
+    const labels = issueData.labels?.join(", ") || "None";
+
+    const issueText = [
+      `# Issue #${issueData.iid}: ${issueData.title}`,
+      `**State:** ${issueData.state} | **Author:** @${issueData.author.username} | **Assignees:** ${assignees}`,
+      `**Labels:** ${labels}`,
+      `**URL:** ${issueData.web_url}`,
+      `\n## Description\n`,
+      issueData.description || "No description provided."
+    ].join("\n");
+
+    return {
+      content: [{ type: "text" as const, text: issueText }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "get_issue") }]
+    };
+  }
+}
+
+export async function updateIssue(params: z.infer<typeof UpdateIssueSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    
+    // Construct the payload based on provided params
+    const payload: any = {};
+    if (params.state_event) payload.state_event = params.state_event;
+    if (params.labels !== undefined) payload.labels = params.labels;
+    if (params.add_labels) payload.add_labels = params.add_labels;
+    if (params.remove_labels) payload.remove_labels = params.remove_labels;
+    if (params.assignee_ids !== undefined) payload.assignee_ids = params.assignee_ids;
+    if (params.description !== undefined) payload.description = params.description;
+
+    const issueData = await gitlab.put<GitLabIssue>(`/projects/${projectId}/issues/${params.issue_iid}`, payload);
+
+    return {
+      content: [{ type: "text" as const, text: `Issue #${issueData.iid} updated successfully: ${issueData.web_url}` }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "update_issue") }]
     };
   }
 }

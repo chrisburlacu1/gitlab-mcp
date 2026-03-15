@@ -12,3 +12,9 @@ export const GetRepositoryTreeSchema = z.object({
   ref: z.string().optional().default("main").describe("Branch name, tag, or commit SHA"),
   recursive: z.boolean().optional().default(true).describe("Whether to list files recursively")
 }).strict();
+
+export const CreateBranchSchema = z.object({
+  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path to automatically resolve."),
+  branch: z.string().describe("Name of the new branch"),
+  ref: z.string().describe("Source branch, tag, or commit SHA to create the branch from")
+}).strict();

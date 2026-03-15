@@ -3,7 +3,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 import { SearchProjectsSchema, GetProjectSchema, SetProjectAliasSchema } from "./schemas/projects.js";
-import { ListIssuesSchema, CreateIssueSchema } from "./schemas/issues.js";
+import { ListIssuesSchema, CreateIssueSchema, GetIssueSchema, UpdateIssueSchema } from "./schemas/issues.js";
 import {
   CreateMergeRequestSchema,
   ListMergeRequestsSchema,
@@ -12,12 +12,12 @@ import {
   CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema } from "./schemas/notes.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema } from "./schemas/repository.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema } from "./schemas/repository.js";
 import { SearchCodeSchema, FindDefinitionsSchema } from "./schemas/search.js";
 import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
 import { searchProjects, getProject, setProjectAlias } from "./tools/projects.js";
-import { listIssues, createIssue } from "./tools/issues.js";
+import { listIssues, createIssue, getIssue, updateIssue } from "./tools/issues.js";
 import {
   createMergeRequest,
   listMergeRequests,
@@ -26,7 +26,7 @@ import {
   createReviewComment,
 } from "./tools/merge-requests.js";
 import { createNote } from "./tools/notes.js";
-import { getFileContents, getRepositoryTree } from "./tools/repository.js";
+import { getFileContents, getRepositoryTree, createBranch } from "./tools/repository.js";
 import { searchCode, findDefinitions } from "./tools/search.js";
 import { listPipelines, getPipelineJobs, getJobLog } from "./tools/ci-cd.js";
 
@@ -321,6 +321,54 @@ server.registerTool(
     },
   },
   getJobLog,
+);
+
+server.registerTool(
+  "gitlab_get_issue",
+  {
+    title: "Get Issue",
+    description: "Get full details of a specific issue including its description and status.",
+    inputSchema: GetIssueSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getIssue,
+);
+
+server.registerTool(
+  "gitlab_update_issue",
+  {
+    title: "Update Issue",
+    description: "Update an issue's state, labels, or assignment.",
+    inputSchema: UpdateIssueSchema,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  updateIssue,
+);
+
+server.registerTool(
+  "gitlab_create_branch",
+  {
+    title: "Create Branch",
+    description: "Create a new branch from an existing reference.",
+    inputSchema: CreateBranchSchema,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  createBranch,
 );
 
 async function main() {
