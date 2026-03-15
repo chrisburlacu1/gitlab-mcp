@@ -1,4 +1,4 @@
-# Plan: Improve MCP Tool Responses
+# [COMPLETED] Plan: Improve MCP Tool Responses
 
 ## Objective
 To reduce token consumption and improve readability by refactoring the GitLab MCP tools to return concise, human-readable text (Markdown) rather than full, raw JSON dumps. This addresses the problem where simple requests like "get project" overwhelm the LLM with unnecessary data.

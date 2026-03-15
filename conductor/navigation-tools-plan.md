@@ -1,4 +1,4 @@
-# Plan: Implement Repository Tree and Symbol Definition Search
+# [COMPLETED] Plan: Implement Repository Tree and Symbol Definition Search
 
 ## Objective
 Enhance the agent's ability to navigate and understand the repository by providing a tool to view the project structure and a tool to find code definitions (classes, functions, etc.).

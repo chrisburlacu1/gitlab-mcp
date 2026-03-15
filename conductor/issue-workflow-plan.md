@@ -1,4 +1,4 @@
-# Plan: Issue Completion Workflow
+# [COMPLETED] Plan: Issue Completion Workflow
 
 ## Objective
 Provide the necessary tools and documentation for an LLM agent to autonomously pick up an issue, create a working branch, make changes, and open a Merge Request that resolves the issue.

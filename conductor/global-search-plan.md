@@ -1,4 +1,4 @@
-# Plan: Implement Multi-Project Code Search
+# [COMPLETED] Plan: Implement Multi-Project Code Search
 
 ## Objective
 Create a new tool `gitlab_search_code` that leverages GitLab's Advanced Search API to find code snippets across a specific project, a group, or globally across all accessible projects.

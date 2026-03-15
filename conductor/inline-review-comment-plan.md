@@ -1,4 +1,4 @@
-# Plan: Add Inline Review Comment Tool
+# [COMPLETED] Plan: Add Inline Review Comment Tool
 
 ## Objective
 Add a new tool `gitlab_create_review_comment` to allow LLMs to make inline code comments on specific lines within a merge request, grouped logically with the merge request tools.

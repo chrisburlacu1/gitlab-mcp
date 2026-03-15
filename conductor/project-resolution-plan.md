@@ -1,4 +1,4 @@
-# Plan: Project ID Resolution and Caching
+# [COMPLETED] Plan: Project ID Resolution and Caching
 
 ## Objective
 Reduce the number of steps required for the LLM agent by allowing tools to accept project names, paths, or search terms in addition to numeric IDs. The MCP server will automatically resolve these text inputs to numeric `project_id`s using a cache to minimize API calls.
