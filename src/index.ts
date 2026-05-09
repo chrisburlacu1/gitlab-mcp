@@ -12,8 +12,8 @@ import {
   CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema } from "./schemas/notes.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema, GetProjectStackSchema, ReadImportedFileSchema } from "./schemas/repository.js";
-import { SearchCodeSchema, FindDefinitionsSchema } from "./schemas/search.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema, GetProjectStackSchema, ReadImportedFileSchema, GetFileBlameSchema } from "./schemas/repository.js";
+import { SearchCodeSchema, FindDefinitionsSchema, FindUsagesSchema } from "./schemas/search.js";
 import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
 import { searchProjects, getProject, setProjectShortcut } from "./tools/projects.js";
@@ -26,8 +26,8 @@ import {
   createReviewComment,
 } from "./tools/merge-requests.js";
 import { createNote } from "./tools/notes.js";
-import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles, getProjectStack, readImportedFile } from "./tools/repository.js";
-import { searchCode, findDefinitions } from "./tools/search.js";
+import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles, getProjectStack, readImportedFile, getFileBlame } from "./tools/repository.js";
+import { searchCode, findDefinitions, findUsages } from "./tools/search.js";
 import { listPipelines, getPipelineJobs, getJobLog } from "./tools/ci-cd.js";
 
 const server = new McpServer({
@@ -292,6 +292,22 @@ server.registerTool(
 );
 
 server.registerTool(
+  "gitlab_find_usages",
+  {
+    title: "Find Usages",
+    description: "Find where a class, function, or symbol is used/referenced in the project.",
+    inputSchema: FindUsagesSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  findUsages,
+);
+
+server.registerTool(
   "gitlab_list_pipelines",
   {
     title: "List Pipelines",
@@ -417,6 +433,22 @@ server.registerTool(
     },
   },
   readImportedFile,
+);
+
+server.registerTool(
+  "gitlab_get_file_blame",
+  {
+    title: "Get File Blame",
+    description: "Get line-by-line attribution for a file to see who last changed each part.",
+    inputSchema: GetFileBlameSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getFileBlame,
 );
 
 async function main() {

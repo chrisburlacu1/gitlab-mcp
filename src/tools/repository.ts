@@ -2,13 +2,15 @@ import { z } from "zod";
 import path from "path";
 import { gitlab, handleApiError } from "../services/gitlab.js";
 import { projectResolver } from "../services/project-resolver.js";
+import { GitLabProject } from "../types.js";
 import { 
   GetFileContentsSchema, 
   GetRepositoryTreeSchema, 
   CreateBranchSchema, 
   GetMultipleFilesSchema,
   GetProjectStackSchema,
-  ReadImportedFileSchema
+  ReadImportedFileSchema,
+  GetFileBlameSchema
 } from "../schemas/repository.js";
 
 export async function getFileContents(
@@ -264,6 +266,68 @@ export async function readImportedFile(params: z.infer<typeof ReadImportedFileSc
     return {
       isError: true,
       content: [{ type: "text" as const, text: handleApiError(error, "read_imported_file") }]
+    };
+  }
+}
+
+export async function getFileBlame(params: z.infer<typeof GetFileBlameSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const encodedPath = encodeURIComponent(params.file_path);
+    
+    // Get project details to build correct web URLs
+    const project = await gitlab.get<GitLabProject>(`/projects/${projectId}`);
+    
+    const blameData = await gitlab.get<any[]>(
+      `/projects/${projectId}/repository/files/${encodedPath}/blame`,
+      {
+        params: { ref: params.ref },
+      },
+    );
+
+    if (!blameData || blameData.length === 0) {
+      return {
+        content: [{ type: "text" as const, text: "No blame information available for this file." }]
+      };
+    }
+
+    let report = `## File Blame: \`${params.file_path}\` (${params.ref})\n\n`;
+    
+    let currentLine = 1;
+    let lastCommitId = "";
+
+    blameData.forEach((section: any) => {
+      const commit = section.commit;
+      const linesInSection = section.lines.length;
+      const endLine = currentLine + linesInSection - 1;
+      
+      const range = linesInSection > 1 
+        ? `Lines ${currentLine} - ${endLine}`
+        : `Line ${currentLine}`;
+
+      // Only show commit header if it's different from the last one (grouping consecutive sections)
+      if (commit.id !== lastCommitId) {
+        report += `### ${range}\n`;
+        report += `- **Author:** ${commit.author_name}\n`;
+        report += `- **Date:** ${new Date(commit.committed_date).toLocaleDateString()}\n`;
+        report += `- **Commit:** [\`${commit.id.substring(0, 8)}\`](${project.web_url}/-/commit/${commit.id})\n`;
+        report += `- **Message:** ${commit.message.split('\n')[0]}\n\n`;
+      } else {
+        // If same commit, just update the previous range (this is rare in blame but possible)
+        report += `*...continued for ${range}*\n\n`;
+      }
+
+      currentLine = endLine + 1;
+      lastCommitId = commit.id;
+    });
+
+    return {
+      content: [{ type: "text" as const, text: report }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "get_file_blame") }]
     };
   }
 }

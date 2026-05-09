@@ -6,3 +6,5 @@ dist/
 .DS_Store
 .gemini/
 gha-creds-*.json
+.qwen
+project-cache.json

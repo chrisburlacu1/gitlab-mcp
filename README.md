@@ -29,13 +29,15 @@ This server requires the following environment variables:
 - **`gitlab_read_imported_file`**: Follow and read relative imports from a source file automatically.
 - **`gitlab_create_branch`**: Create a new branch for development.
 - **`gitlab_set_project_shortcut`**: Create a persistent shorthand shortcut for a project ID or path.
+- **`gitlab_get_file_blame`**: Get line-by-line attribution and commit history for a file.
 
 ### Code & Search
 
 - **`gitlab_get_file_contents`**: Read the raw content of any file. Supports `start_line` and `end_line` for targeted reading.
 - **`gitlab_get_multiple_files`**: Fetch the contents of multiple files concurrently in a single request.
 - **`gitlab_search_code`**: Search for code snippets globally, or scoped to a specific group/project.
-- **`gitlab_find_definitions`**: Find where a class, function, or symbol is declared. Optimized for compatibility across all GitLab tiers.
+- **`gitlab_find_definitions`**: Find where a class, function, or symbol is declared.
+- **`gitlab_find_usages`**: Find where a symbol is referenced across a project (intelligently filters out definitions).
 
 ### Issues
 

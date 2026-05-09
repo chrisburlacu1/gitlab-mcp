@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const CreateMergeRequestSchema = z.object({
-  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
   source_branch: z.string().describe("The source branch"),
   target_branch: z.string().describe("The target branch"),
   title: z.string().describe("Title of the MR"),
@@ -9,7 +9,7 @@ export const CreateMergeRequestSchema = z.object({
 }).strict();
 
 export const ListMergeRequestsSchema = z.object({
-  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
   state: z.enum(["opened", "closed", "locked", "merged", "all"]).optional().describe("Filter by state"),
   source_branch: z.string().optional().describe("Filter by source branch"),
   target_branch: z.string().optional().describe("Filter by target branch"),
@@ -17,7 +17,7 @@ export const ListMergeRequestsSchema = z.object({
 }).strict();
 
 export const UpdateMergeRequestSchema = z.object({
-  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
   merge_request_iid: z.number().describe("The internal ID (IID) of the MR"),
   title: z.string().optional().describe("New title"),
   description: z.string().optional().describe("New description"),
@@ -27,12 +27,12 @@ export const UpdateMergeRequestSchema = z.object({
 }).strict();
 
 export const GetMergeRequestChangesSchema = z.object({
-  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
   merge_request_iid: z.number().describe("The internal ID (IID) of the MR")
 }).strict();
 
 export const CreateReviewCommentSchema = z.object({
-  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
   merge_request_iid: z.number().describe("The internal ID (IID) of the MR"),
   body: z.string().describe("The text content of the comment"),
   base_sha: z.string().describe("Base commit SHA of the merge request (the commit on the target branch)"),

@@ -8,7 +8,7 @@ export const SearchProjectsSchema = z.object({
 }).strict();
 
 export const GetProjectSchema = z.object({
-  project_id: z.union([z.number(), z.string()]).describe("The ID of the project, or a search term/path (e.g., 'namespace/project' or 'ollama widget') to automatically resolve."),
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut (e.g., 'nds') of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
 }).strict();
 
 export const SetProjectShortcutSchema = z.object({
