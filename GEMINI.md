@@ -19,9 +19,9 @@ A Model Context Protocol (MCP) server that provides a comprehensive interface fo
 
 - **Projects:** Search, get metadata (with recent Issues/MRs), and set persistent shorthand shortcuts (e.g., `nds`).
 - **Issues:** List, filter, get full details, create, and update (assign/state/labels) issues.
-- **Merge Requests:** List, create, update, view diffs, and add inline code review comments.
+- **Merge Requests:** List, create, update, view diffs, fetch threaded discussions/comments, and add inline code review comments.
 - **CI/CD Pipelines:** Monitor pipelines, inspect specific jobs, and fetch job trace logs with auto-analysis prompts.
-- **Repository:** Fetch raw file contents (with line-range support), fetch multiple files concurrently, follow relative imports, view recursive directory trees, profile the tech stack, get line-by-line attribution (blame), and create branches.
+- **Repository:** Fetch raw file contents (with line-range support), fetch multiple files concurrently, follow relative imports, view recursive directory trees, profile the tech stack, get line-by-line attribution (blame), list commit history, view commit diffs, and create branches.
 - **Advanced Search:** Search for code snippets, find symbol definitions, and find symbol usages (filtered to call sites) globally or scoped to groups/projects.
 
 ## Development Conventions

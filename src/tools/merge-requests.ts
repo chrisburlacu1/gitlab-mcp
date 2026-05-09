@@ -142,11 +142,13 @@ export async function getMergeRequestChanges(
       .map((change: any) => `File: ${change.new_path}\nDiff:\n${change.diff}`)
       .join("\n\n");
 
+    const output = (formattedChanges || "No changes found.") + "\n\n---\n**ANALYSIS REQUIRED:** Review the above changes for potential bugs, security vulnerabilities, and adherence to project conventions. If you find issues, prepare to use 'gitlab_create_review_comment' to provide inline feedback.";
+
     return {
       content: [
         {
           type: "text" as const,
-          text: formattedChanges || "No changes found.",
+          text: output,
         },
       ],
     };

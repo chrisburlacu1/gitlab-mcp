@@ -10,7 +10,9 @@ import {
   GetMultipleFilesSchema,
   GetProjectStackSchema,
   ReadImportedFileSchema,
-  GetFileBlameSchema
+  GetFileBlameSchema,
+  ListCommitsSchema,
+  GetCommitSchema
 } from "../schemas/repository.js";
 
 export async function getFileContents(
@@ -328,6 +330,89 @@ export async function getFileBlame(params: z.infer<typeof GetFileBlameSchema>) {
     return {
       isError: true,
       content: [{ type: "text" as const, text: handleApiError(error, "get_file_blame") }]
+    };
+  }
+}
+
+export async function listCommits(params: z.infer<typeof ListCommitsSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const commits = await gitlab.get<any[]>(`/projects/${projectId}/repository/commits`, {
+      params: {
+        ref_name: params.ref_name,
+        path: params.path,
+        per_page: params.limit
+      }
+    });
+
+    if (!commits || commits.length === 0) {
+      return {
+        content: [{ type: "text" as const, text: "No commits found matching the criteria." }]
+      };
+    }
+
+    const project = await gitlab.get<GitLabProject>(`/projects/${projectId}`);
+
+    let report = `## Commits for project \`${project.path_with_namespace}\`\n\n`;
+    report += "| Date | Author | SHA | Message |\n";
+    report += "| :--- | :--- | :--- | :--- |\n";
+
+    commits.forEach(commit => {
+      const date = new Date(commit.committed_date).toLocaleDateString();
+      const shortSha = commit.id.substring(0, 8);
+      const commitUrl = `${project.web_url}/-/commit/${commit.id}`;
+      const message = commit.title; // First line of message
+      report += `| ${date} | ${commit.author_name} | [\`${shortSha}\`](${commitUrl}) | ${message} |\n`;
+    });
+
+    return {
+      content: [{ type: "text" as const, text: report }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "list_commits") }]
+    };
+  }
+}
+
+export async function getCommit(params: z.infer<typeof GetCommitSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    
+    const [commit, diffs, project] = await Promise.all([
+      gitlab.get<any>(`/projects/${projectId}/repository/commits/${params.commit_sha}`),
+      gitlab.get<any[]>(`/projects/${projectId}/repository/commits/${params.commit_sha}/diff`),
+      gitlab.get<GitLabProject>(`/projects/${projectId}`)
+    ]);
+
+    let report = `## Commit: ${commit.title}\n\n`;
+    report += `- **Author:** ${commit.author_name} <${commit.author_email}>\n`;
+    report += `- **Date:** ${new Date(commit.committed_date).toLocaleString()}\n`;
+    report += `- **SHA:** \`${commit.id}\`\n`;
+    report += `- **Web URL:** [View on GitLab](${project.web_url}/-/commit/${commit.id})\n\n`;
+    
+    if (commit.message !== commit.title) {
+      report += `### Description\n\n${commit.message}\n\n`;
+    }
+
+    report += `### Diffs (${diffs.length} files)\n\n`;
+
+    diffs.forEach(diff => {
+      report += `#### ${diff.new_path}${diff.renamed_file ? ` (renamed from ${diff.old_path})` : ""}\n`;
+      if (diff.new_file) report += `*(New file)*\n`;
+      if (diff.deleted_file) report += `*(Deleted file)*\n`;
+      
+      report += "```diff\n" + diff.diff + "\n```\n\n";
+    });
+
+    return {
+      content: [{ type: "text" as const, text: report }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "get_commit") }]
     };
   }
 }

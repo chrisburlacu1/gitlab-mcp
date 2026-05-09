@@ -75,3 +75,9 @@ export interface GitLabNote {
   noteable_type: string;
   noteable_iid: number;
 }
+
+export interface GitLabDiscussion {
+  id: string;
+  individual_note: boolean;
+  notes: GitLabNote[];
+}

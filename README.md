@@ -30,6 +30,8 @@ This server requires the following environment variables:
 - **`gitlab_create_branch`**: Create a new branch for development.
 - **`gitlab_set_project_shortcut`**: Create a persistent shorthand shortcut for a project ID or path.
 - **`gitlab_get_file_blame`**: Get line-by-line attribution and commit history for a file.
+- **`gitlab_list_commits`**: Get recent commits for a project or specific branch/path.
+- **`gitlab_get_commit`**: Get details and diff for a specific commit.
 
 ### Code & Search
 
@@ -45,14 +47,16 @@ This server requires the following environment variables:
 - **`gitlab_get_issue`**: Get full details, description, and status of a specific issue.
 - **`gitlab_create_issue`**: Create a new issue with labels and description.
 - **`gitlab_update_issue`**: Update an issue's state, labels, or assignment.
+- **`gitlab_get_discussions`**: Fetch all comments and review threads for an issue.
 
 ### Merge Requests
 
 - **`gitlab_list_merge_requests`**: List and filter MRs for a project.
 - **`gitlab_create_merge_request`**: Open a new merge request between branches.
 - **`gitlab_update_merge_request`**: Update MR details or change its state.
-- **`gitlab_get_merge_request_changes`**: View the file diffs for a specific merge request.
+- **`gitlab_get_merge_request_changes`**: View file diffs for an MR with automated analysis prompts.
 - **`gitlab_create_review_comment`**: Add an inline code comment on a specific line within an MR.
+- **`gitlab_get_discussions`**: Fetch all comments and review threads for an MR.
 
 ### Comments
 

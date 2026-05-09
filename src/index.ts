@@ -11,8 +11,8 @@ import {
   GetMergeRequestChangesSchema,
   CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
-import { CreateNoteSchema } from "./schemas/notes.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema, GetProjectStackSchema, ReadImportedFileSchema, GetFileBlameSchema } from "./schemas/repository.js";
+import { CreateNoteSchema, GetDiscussionsSchema } from "./schemas/notes.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema, GetProjectStackSchema, ReadImportedFileSchema, GetFileBlameSchema, ListCommitsSchema, GetCommitSchema } from "./schemas/repository.js";
 import { SearchCodeSchema, FindDefinitionsSchema, FindUsagesSchema } from "./schemas/search.js";
 import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
@@ -25,8 +25,8 @@ import {
   getMergeRequestChanges,
   createReviewComment,
 } from "./tools/merge-requests.js";
-import { createNote } from "./tools/notes.js";
-import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles, getProjectStack, readImportedFile, getFileBlame } from "./tools/repository.js";
+import { createNote, getDiscussions } from "./tools/notes.js";
+import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles, getProjectStack, readImportedFile, getFileBlame, listCommits, getCommit } from "./tools/repository.js";
 import { searchCode, findDefinitions, findUsages } from "./tools/search.js";
 import { listPipelines, getPipelineJobs, getJobLog } from "./tools/ci-cd.js";
 
@@ -209,6 +209,22 @@ server.registerTool(
     },
   },
   createNote,
+);
+
+server.registerTool(
+  "gitlab_get_discussions",
+  {
+    title: "Get Discussions",
+    description: "Get threaded discussions for an issue or merge request.",
+    inputSchema: GetDiscussionsSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getDiscussions,
 );
 
 server.registerTool(
@@ -449,6 +465,38 @@ server.registerTool(
     },
   },
   getFileBlame,
+);
+
+server.registerTool(
+  "gitlab_list_commits",
+  {
+    title: "List Commits",
+    description: "List repository commits with optional filtering by branch, tag, or path.",
+    inputSchema: ListCommitsSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  listCommits,
+);
+
+server.registerTool(
+  "gitlab_get_commit",
+  {
+    title: "Get Commit",
+    description: "Get details and diff of a specific commit.",
+    inputSchema: GetCommitSchema,
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  getCommit,
 );
 
 async function main() {

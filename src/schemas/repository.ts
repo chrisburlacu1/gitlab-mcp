@@ -43,3 +43,15 @@ export const GetFileBlameSchema = z.object({
   file_path: z.string().describe("Full path to the file"),
   ref: z.string().optional().default("main").describe("Branch name, tag, or commit SHA")
 }).strict();
+
+export const ListCommitsSchema = z.object({
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
+  ref_name: z.string().optional().describe("The name of a repository branch or tag or if not given the default branch"),
+  path: z.string().optional().describe("The file path"),
+  limit: z.number().optional().default(20).describe("Maximum number of commits to return (default: 20)")
+}).strict();
+
+export const GetCommitSchema = z.object({
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
+  commit_sha: z.string().describe("The commit hash or name of a repository branch or tag")
+}).strict();
