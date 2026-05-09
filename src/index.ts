@@ -12,7 +12,7 @@ import {
   CreateReviewCommentSchema,
 } from "./schemas/merge-requests.js";
 import { CreateNoteSchema, GetDiscussionsSchema } from "./schemas/notes.js";
-import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema, GetProjectStackSchema, ReadImportedFileSchema, GetFileBlameSchema, ListCommitsSchema, GetCommitSchema } from "./schemas/repository.js";
+import { GetFileContentsSchema, GetRepositoryTreeSchema, CreateBranchSchema, GetMultipleFilesSchema, GetProjectStackSchema, ReadImportedFileSchema, GetFileBlameSchema, ListCommitsSchema, GetCommitSchema, BatchCommitSchema } from "./schemas/repository.js";
 import { SearchCodeSchema, FindDefinitionsSchema, FindUsagesSchema } from "./schemas/search.js";
 import { ListPipelinesSchema, GetPipelineJobsSchema, GetJobLogSchema } from "./schemas/ci-cd.js";
 
@@ -26,7 +26,7 @@ import {
   createReviewComment,
 } from "./tools/merge-requests.js";
 import { createNote, getDiscussions } from "./tools/notes.js";
-import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles, getProjectStack, readImportedFile, getFileBlame, listCommits, getCommit } from "./tools/repository.js";
+import { getFileContents, getRepositoryTree, createBranch, getMultipleFiles, getProjectStack, readImportedFile, getFileBlame, listCommits, getCommit, batchCommit } from "./tools/repository.js";
 import { searchCode, findDefinitions, findUsages } from "./tools/search.js";
 import { listPipelines, getPipelineJobs, getJobLog } from "./tools/ci-cd.js";
 
@@ -497,6 +497,22 @@ server.registerTool(
     },
   },
   getCommit,
+);
+
+server.registerTool(
+  "gitlab_batch_commit",
+  {
+    title: "Batch Commit",
+    description: "Perform multiple file actions (create, update, delete) in a single commit via the GitLab API.",
+    inputSchema: BatchCommitSchema,
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  batchCommit,
 );
 
 async function main() {

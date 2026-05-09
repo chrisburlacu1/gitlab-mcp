@@ -12,7 +12,8 @@ import {
   ReadImportedFileSchema,
   GetFileBlameSchema,
   ListCommitsSchema,
-  GetCommitSchema
+  GetCommitSchema,
+  BatchCommitSchema
 } from "../schemas/repository.js";
 
 export async function getFileContents(
@@ -413,6 +414,29 @@ export async function getCommit(params: z.infer<typeof GetCommitSchema>) {
     return {
       isError: true,
       content: [{ type: "text" as const, text: handleApiError(error, "get_commit") }]
+    };
+  }
+}
+
+export async function batchCommit(params: z.infer<typeof BatchCommitSchema>) {
+  try {
+    const projectId = await projectResolver.resolve(params.project_id);
+    const commitData = await gitlab.post<any>(`/projects/${projectId}/repository/commits`, {
+      branch: params.branch,
+      commit_message: params.commit_message,
+      actions: params.actions
+    });
+
+    return {
+      content: [{ 
+        type: "text" as const, 
+        text: `Successfully created batch commit on branch \`${params.branch}\`.\n\n- **SHA:** \`${commitData.id}\`\n- **URL:** [View Commit](${commitData.web_url})` 
+      }]
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [{ type: "text" as const, text: handleApiError(error, "batch_commit") }]
     };
   }
 }

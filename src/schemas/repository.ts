@@ -44,6 +44,20 @@ export const GetFileBlameSchema = z.object({
   ref: z.string().optional().default("main").describe("Branch name, tag, or commit SHA")
 }).strict();
 
+export const BatchCommitSchema = z.object({
+  project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
+  branch: z.string().describe("The name of the branch to commit to."),
+  commit_message: z.string().describe("The commit message."),
+  actions: z.array(z.object({
+    action: z.enum(["create", "delete", "move", "update", "chmod"]),
+    file_path: z.string(),
+    content: z.string().optional(),
+    previous_path: z.string().optional(),
+    encoding: z.enum(["text", "base64"]).optional(),
+    last_commit_id: z.string().optional()
+  })).min(1).describe("List of actions to perform in the commit.")
+}).strict();
+
 export const ListCommitsSchema = z.object({
   project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
   ref_name: z.string().optional().describe("The name of a repository branch or tag or if not given the default branch"),

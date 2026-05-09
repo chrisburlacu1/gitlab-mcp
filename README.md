@@ -32,6 +32,7 @@ This server requires the following environment variables:
 - **`gitlab_get_file_blame`**: Get line-by-line attribution and commit history for a file.
 - **`gitlab_list_commits`**: Get recent commits for a project or specific branch/path.
 - **`gitlab_get_commit`**: Get details and diff for a specific commit.
+- **`gitlab_batch_commit`**: Perform multiple file actions (create, update, delete) in a single commit directly via the GitLab API.
 
 ### Code & Search
 
