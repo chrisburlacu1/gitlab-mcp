@@ -170,19 +170,40 @@ export async function createReviewComment(
 ) {
   try {
     const projectId = await projectResolver.resolve(params.project_id);
+    
+    // 1. Fetch the MR to get the diff_refs (base_sha, start_sha, head_sha)
+    const mrData = await gitlab.get<any>(
+      `/projects/${projectId}/merge_requests/${params.merge_request_iid}`
+    );
+
+    if (!mrData.diff_refs) {
+      throw new Error("Could not retrieve diff_refs for this Merge Request. Is there a valid diff?");
+    }
+
+    // 2. Fetch the changes to map the file path correctly (handling renames if necessary, though we assume new_path matches for simplicity here)
+    const changesData = await gitlab.get<any>(
+      `/projects/${projectId}/merge_requests/${params.merge_request_iid}/changes`
+    );
+    
+    const fileChange = changesData.changes.find((c: any) => c.new_path === params.file_path || c.old_path === params.file_path);
+    
+    if (!fileChange) {
+      throw new Error(`File '${params.file_path}' not found in the merge request changes.`);
+    }
+
+    // 3. Post the comment using the fetched SHAs
     await gitlab.post(
       `/projects/${projectId}/merge_requests/${params.merge_request_iid}/discussions`,
       {
         body: params.body,
         position: {
-          base_sha: params.base_sha,
-          start_sha: params.start_sha,
-          head_sha: params.head_sha,
+          base_sha: mrData.diff_refs.base_sha,
+          start_sha: mrData.diff_refs.start_sha || mrData.diff_refs.base_sha,
+          head_sha: mrData.diff_refs.head_sha,
           position_type: "text",
-          old_path: params.old_path,
-          new_path: params.new_path,
-          old_line: params.old_line,
-          new_line: params.new_line,
+          old_path: fileChange.old_path,
+          new_path: fileChange.new_path,
+          new_line: params.line // Assuming commenting on the new version of the code
         },
       },
     );
@@ -191,7 +212,7 @@ export async function createReviewComment(
       content: [
         {
           type: "text" as const,
-          text: `Review comment created successfully.`,
+          text: `Review comment created successfully on ${params.file_path} at line ${params.line}.`,
         },
       ],
     };

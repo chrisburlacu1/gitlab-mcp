@@ -34,12 +34,7 @@ export const GetMergeRequestChangesSchema = z.object({
 export const CreateReviewCommentSchema = z.object({
   project_id: z.union([z.number(), z.string()]).describe("The ID, path, name, or shorthand shortcut of the project. The server automatically resolves these, so DO NOT call gitlab_search_projects first if you already have a name or path."),
   merge_request_iid: z.number().describe("The internal ID (IID) of the MR"),
-  body: z.string().describe("The text content of the comment"),
-  base_sha: z.string().describe("Base commit SHA of the merge request (the commit on the target branch)"),
-  start_sha: z.string().describe("Start commit SHA (usually same as base_sha)"),
-  head_sha: z.string().describe("Head commit SHA (the latest commit on the source branch)"),
-  old_path: z.string().optional().describe("The path of the file before changes (needed if the file was moved or renamed)"),
-  new_path: z.string().optional().describe("The path of the file after changes (usually the same as old_path)"),
-  old_line: z.number().optional().describe("The line number in the original file"),
-  new_line: z.number().optional().describe("The line number in the changed file")
+  file_path: z.string().describe("The relative path to the file being commented on"),
+  line: z.number().describe("The line number in the changed file to comment on"),
+  body: z.string().describe("The text content of the comment")
 }).strict();
